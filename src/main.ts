@@ -6,8 +6,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const config = new DocumentBuilder()
-    .setTitle('ably project')
-    .setDescription('ably API')
+    .setTitle('saka project')
+    .setDescription('saka API')
     .setVersion('1.0')
     .build();
 

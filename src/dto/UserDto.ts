@@ -6,3 +6,9 @@ export class UserDto {
   @ApiProperty({ description: 'password' })
   password: string;
 }
+
+export interface UserInfo {
+  id: number;
+  email: string;
+  password: string;
+}
