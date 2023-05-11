@@ -2,11 +2,12 @@ import {
   BadRequestException,
   Injectable,
   UnauthorizedException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserDto } from '../dto/UserDto';
 import { User } from '../entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import * as uuid from 'uuid';
 
 @Injectable()
@@ -14,6 +15,7 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    private dataSource: DataSource,
   ) {
     this.userRepository = userRepository;
   }
@@ -41,6 +43,11 @@ export class UserService {
   }
 
   async createUser(userDto: UserDto) {
+    const userExist = await this.checkUserExists(userDto.email);
+    if (userExist) {
+      throw new UnprocessableEntityException('이미 존재하는 이메일입니다.');
+    }
+
     await this.checkUserExists(userDto.email);
 
     const signupVerifyToken = uuid.v1();
@@ -69,12 +76,19 @@ export class UserService {
     throw new Error('');
   }
 
-  private checkUserExists(email: string) {
-    return false;
+  private async checkUserExists(email: string) {
+    const user = await this.userRepository.findOne({
+      where: { email: email },
+    });
+
+    return user !== undefined;
   }
 
-  private saveUser(user: UserDto, signupVerifyToken: string) {
-    return;
+  private async saveUser(userDto: UserDto, signupVerifyToken: string) {
+    const user = new User(userDto);
+    user.signupVerifyToken = signupVerifyToken;
+
+    await this.userRepository.save(user);
   }
 
   private sendMemberJoinEmail(email, signupVerifyToken: string) {

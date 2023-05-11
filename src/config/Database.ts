@@ -1,15 +1,14 @@
-import { Product, User, Zzim, ZzimDrawer } from 'src/entity';
 import { MysqlConnectionOptions } from 'typeorm/driver/mysql/MysqlConnectionOptions';
 
 export const databseConfig: MysqlConnectionOptions = {
   type: 'mysql',
-  host: 'localhost',
+  host: process.env.DATABASE_HOST,
   port: 3306,
-  username: 'saka',
-  password: 'sakaproject230506',
+  username: process.env.DATABASE_USERNAME,
+  password: process.env.DATABASE_PASSWORD,
   database: 'saka',
-  entities: [Product, User, Zzim, ZzimDrawer],
-  synchronize: true,
+  entities: [`${__dirname}/../entity/*.js`, `${__dirname}/../entity/*.ts`],
+  synchronize: Boolean(process.env.DATABASE_SYNCHRONIZE),
   logging: true,
 };
 

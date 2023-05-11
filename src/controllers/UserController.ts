@@ -8,13 +8,13 @@ import {
   Patch,
   Post,
   Query,
+  ValidationPipe,
 } from '@nestjs/common';
 import { UserService } from '../services/UserService';
 import { UserDto } from '../dto/UserDto';
 import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { User } from 'src/entity';
 import { VerifyEmailDto } from 'src/dto/VerifyEmailDto';
-import { UserInfo } from 'os';
 
 @Controller('user')
 @ApiTags('유저 API')
@@ -25,7 +25,7 @@ export class UserController {
   @Post('/add')
   @ApiOperation({ summary: '유저 생성 API' })
   @ApiCreatedResponse({ description: '유저를 생성한다.', type: User })
-  public add(@Body() user: UserDto) {
+  public add(@Body(ValidationPipe) user: UserDto) {
     return this.userService.createUser(user);
   }
 

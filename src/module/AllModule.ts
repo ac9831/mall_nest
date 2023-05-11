@@ -1,17 +1,29 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { ZzimController } from 'src/controllers/ZzimController';
 import { ZzimDrawerController } from 'src/controllers/ZzimDrawerController';
-import { Product } from 'src/entity/Product';
-import { User } from 'src/entity/User';
-import { Zzim } from 'src/entity/Zzim';
-import { ZzimDrawer } from 'src/entity/ZzimDrawer';
 import { ZzimDrawerService } from 'src/services/ZzimDrawerService';
 import { ZzimService } from 'src/services/ZzimService';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Product, User, Zzim, ZzimDrawer } from 'src/entity';
+import { UserController } from 'src/controllers/UserController';
+import { UserService } from 'src/services/UserService';
+import { EmailModule } from './EmailModule';
+import { ConfigModule } from '@nestjs/config';
+import EmailConfig from 'src/config/EmailConfig';
+import { validationSchema } from 'src/config/ValidationSchema';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Product, User, Zzim, ZzimDrawer])],
-  controllers: [ZzimController, ZzimDrawerController],
-  providers: [ZzimDrawerService, ZzimService],
+  imports: [
+    ConfigModule.forRoot({
+      envFilePath: `${__dirname}/../config/env/.${process.env.NODE_ENV}.env`,
+      load: [EmailConfig],
+      isGlobal: true,
+      validationSchema,
+    }),
+    EmailModule,
+    TypeOrmModule.forFeature([Zzim, User, ZzimDrawer, Product]),
+  ],
+  controllers: [ZzimController, ZzimDrawerController, UserController],
+  providers: [ZzimDrawerService, ZzimService, UserService],
 })
 export class AllModule {}
