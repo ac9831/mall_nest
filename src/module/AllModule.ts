@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { ZzimController } from 'src/controllers/ZzimController';
 import { ZzimDrawerController } from 'src/controllers/ZzimDrawerController';
 import { ZzimDrawerService } from 'src/services/ZzimDrawerService';
@@ -11,19 +11,23 @@ import { EmailModule } from './EmailModule';
 import { ConfigModule } from '@nestjs/config';
 import EmailConfig from 'src/config/EmailConfig';
 import { validationSchema } from 'src/config/ValidationSchema';
+import AuthConfig from 'src/config/AuthConfig';
+import { AuthService } from 'src/services/AuthService';
+import { AuthModule } from './AuthModule';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       envFilePath: `${__dirname}/../config/env/.${process.env.NODE_ENV}.env`,
-      load: [EmailConfig],
+      load: [EmailConfig, AuthConfig],
       isGlobal: true,
       validationSchema,
     }),
     EmailModule,
+    AuthModule,
     TypeOrmModule.forFeature([Zzim, User, ZzimDrawer, Product]),
   ],
   controllers: [ZzimController, ZzimDrawerController, UserController],
-  providers: [ZzimDrawerService, ZzimService, UserService],
+  providers: [ZzimDrawerService, ZzimService, UserService, Logger],
 })
 export class AllModule {}

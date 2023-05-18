@@ -1,36 +1,44 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserDto } from '../dto/UserDto';
+import { UserDto, UserInfo } from '../dto/UserDto';
 import { User } from '../entity';
-import { DataSource, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import * as uuid from 'uuid';
+import { AuthService } from './AuthService';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    private dataSource: DataSource,
-  ) {
-    this.userRepository = userRepository;
-  }
+    private authService: AuthService,
+  ) {}
 
-  async getUserInfo(userId: number) {
+  async getUserInfo(userId: number): Promise<UserInfo> {
     const user = await this.userRepository.findOne({
       where: {
         id: userId,
       },
     });
 
-    return user;
+    if (!user) {
+      throw new NotFoundException('유저가 존재하지 않습니다.');
+    }
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    };
   }
 
-  async login(userDto: UserDto) {
+  async login(userDto: UserDto): Promise<string> {
     const user = await this.userRepository.findOne({
       where: {
         email: userDto.email,
@@ -39,7 +47,11 @@ export class UserService {
     });
 
     if (!user) throw new UnauthorizedException('존재하지 않은 사용자 입니다.');
-    return user;
+    return this.authService.login({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    });
   }
 
   async createUser(userDto: UserDto) {
@@ -73,7 +85,19 @@ export class UserService {
   }
 
   async verifyEmail(signupVerifyToken: string): Promise<string> {
-    throw new Error('');
+    const user = await this.userRepository.findOne({
+      where: { signupVerifyToken },
+    });
+
+    if (!user) {
+      throw new NotFoundException('유저가 존재하지 않습니다.');
+    }
+
+    return this.authService.login({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    });
   }
 
   private async checkUserExists(email: string) {

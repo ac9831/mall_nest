@@ -4,42 +4,58 @@ import {
   Delete,
   Get,
   HttpCode,
+  Inject,
+  InternalServerErrorException,
+  Logger,
+  LoggerService,
   Param,
   Patch,
   Post,
   Query,
+  UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
 import { UserService } from '../services/UserService';
-import { UserDto } from '../dto/UserDto';
+import { UserDto, UserInfo } from '../dto/UserDto';
 import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { User } from 'src/entity';
 import { VerifyEmailDto } from 'src/dto/VerifyEmailDto';
+import { AuthGuard } from 'src/middleware/AuthGuard';
+import { Roles } from 'src/decorator/Role';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { stringify } from 'querystring';
 
+@Roles('user')
 @Controller('user')
 @ApiTags('유저 API')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    @Inject(Logger) private readonly logger: LoggerService,
+  ) {}
 
   @HttpCode(201)
   @Post('/add')
+  @Roles('admin')
   @ApiOperation({ summary: '유저 생성 API' })
   @ApiCreatedResponse({ description: '유저를 생성한다.', type: User })
   public add(@Body(ValidationPipe) user: UserDto) {
+    this.printLoggerServiceLog(user);
     return this.userService.createUser(user);
   }
 
+  @UseGuards(AuthGuard)
   @Get('/:userId')
   @ApiOperation({ summary: '유저 정보 API' })
   @ApiCreatedResponse({ description: '유저 정보 하나를 가져온다.', type: User })
-  public getUserInfo(@Param('userId') id: number) {
+  public getUserInfo(@Param('userId') id: number): Promise<UserInfo> {
     return this.userService.getUserInfo(id);
   }
 
   @Post('/login')
   @ApiOperation({ summary: '유저 로그인 API' })
   @ApiCreatedResponse({ description: '로그인을 진행한다.', type: User })
-  public login(@Body() userLogin: UserDto): Promise<User> {
+  public login(@Body() userLogin: UserDto): Promise<string> {
     return this.userService.login(userLogin);
   }
 
@@ -64,4 +80,20 @@ export class UserController {
   public update(@Param('id') id: number, @Body() updateUserDto: UserDto) {
     return this.userService.update(id, updateUserDto);
   }
+
+  private printLoggerServiceLog(dto) {
+    try {
+      //throw new InternalServerErrorException('test');
+    } catch (e) {
+      this.logger.error('error: ' + JSON.stringify(dto), e.stack);
+    }
+
+    this.logger.log('log: ' + JSON + stringify(dto));
+  }
+
+  // private printWinstonLog(dto) {
+  //   console.log(this.logger.level);
+
+  //   this.logger.info('info: ', dto);
+  // }
 }
