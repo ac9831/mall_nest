@@ -12,8 +12,9 @@ import { ConfigModule } from '@nestjs/config';
 import EmailConfig from 'src/config/EmailConfig';
 import { validationSchema } from 'src/config/ValidationSchema';
 import AuthConfig from 'src/config/AuthConfig';
-import { AuthService } from 'src/services/AuthService';
 import { AuthModule } from './AuthModule';
+import { ExceptionModule } from './ExceptionModule';
+import { LoggingModule } from './LoggingModule';
 
 @Module({
   imports: [
@@ -25,6 +26,8 @@ import { AuthModule } from './AuthModule';
     }),
     EmailModule,
     AuthModule,
+    ExceptionModule,
+    LoggingModule,
     TypeOrmModule.forFeature([Zzim, User, ZzimDrawer, Product]),
   ],
   controllers: [ZzimController, ZzimDrawerController, UserController],

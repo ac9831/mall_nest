@@ -2,12 +2,13 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './module/AppModule';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
-import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import * as winston from 'winston';
 import {
   utilities as nestWinstonModuleUtilities,
   WinstonModule,
 } from 'nest-winston';
+import { LoggingInterceptor } from './middleware/LoggingInterceptor';
+import { TransformInterceptor } from './middleware/TransformInterceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -26,10 +27,15 @@ async function bootstrap() {
     }),
   });
   //app.useLogger(app.get(MyLogger));
+  //app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
     }),
+  );
+  app.useGlobalInterceptors(
+    new LoggingInterceptor(),
+    new TransformInterceptor(),
   );
   const config = new DocumentBuilder()
     .setTitle('saka project')

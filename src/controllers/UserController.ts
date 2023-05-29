@@ -5,13 +5,13 @@ import {
   Get,
   HttpCode,
   Inject,
-  InternalServerErrorException,
   Logger,
   LoggerService,
   Param,
   Patch,
   Post,
   Query,
+  UseFilters,
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
@@ -22,8 +22,8 @@ import { User } from 'src/entity';
 import { VerifyEmailDto } from 'src/dto/VerifyEmailDto';
 import { AuthGuard } from 'src/middleware/AuthGuard';
 import { Roles } from 'src/decorator/Role';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { stringify } from 'querystring';
+import { HttpExceptionFilter } from 'src/middleware/HttpExceptionFilter';
 
 @Roles('user')
 @Controller('user')
@@ -75,6 +75,7 @@ export class UserController {
     return this.userService.delete(id);
   }
 
+  @UseFilters(HttpExceptionFilter)
   @HttpCode(202)
   @Patch(':id')
   public update(@Param('id') id: number, @Body() updateUserDto: UserDto) {

@@ -5,14 +5,16 @@ import databseConfig from 'src/config/Database';
 import { ConfigService } from '@nestjs/config';
 import { LoggerMiddleware } from 'src/middleware/Logger';
 import { UserController } from 'src/controllers/UserController';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { HandlerRolesGuard } from 'src/middleware/HandlerRolesGuard';
+import { HttpExceptionFilter } from 'src/middleware/HttpExceptionFilter';
 
 @Module({
   imports: [TypeOrmModule.forRoot(databseConfig), AllModule],
   providers: [
     ConfigService,
     { provide: APP_GUARD, useClass: HandlerRolesGuard },
+    { provide: APP_FILTER, useClass: HttpExceptionFilter },
   ],
 })
 export class AppModule implements NestModule {
