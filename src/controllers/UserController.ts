@@ -24,12 +24,15 @@ import { AuthGuard } from 'src/middleware/AuthGuard';
 import { Roles } from 'src/decorator/Role';
 import { stringify } from 'querystring';
 import { HttpExceptionFilter } from 'src/middleware/HttpExceptionFilter';
+import { CommandBus } from '@nestjs/cqrs';
+import { CreateUserCommand } from 'src/cqrs/CreateUserCommand';
 
 @Roles('user')
 @Controller('user')
 @ApiTags('유저 API')
 export class UserController {
   constructor(
+    private commandBus: CommandBus,
     private readonly userService: UserService,
     @Inject(Logger) private readonly logger: LoggerService,
   ) {}
@@ -82,6 +85,14 @@ export class UserController {
     return this.userService.update(id, updateUserDto);
   }
 
+  @Post()
+  async createUser(@Body() dto: UserDto): Promise<void> {
+    const { name, email, password } = dto;
+    const command = new CreateUserCommand(name, email, password);
+
+    return this.commandBus.execute(command);
+  }
+
   private printLoggerServiceLog(dto) {
     try {
       //throw new InternalServerErrorException('test');
@@ -91,10 +102,4 @@ export class UserController {
 
     this.logger.log('log: ' + JSON + stringify(dto));
   }
-
-  // private printWinstonLog(dto) {
-  //   console.log(this.logger.level);
-
-  //   this.logger.info('info: ', dto);
-  // }
 }

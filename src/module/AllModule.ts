@@ -15,6 +15,13 @@ import AuthConfig from 'src/config/AuthConfig';
 import { AuthModule } from './AuthModule';
 import { ExceptionModule } from './ExceptionModule';
 import { LoggingModule } from './LoggingModule';
+import { TerminusModule } from '@nestjs/terminus';
+import { HealthCheckController } from 'src/controllers/HealthCheckController';
+import { HttpModule } from '@nestjs/axios';
+import { DogHealthIndicator } from 'src/middleware/DogHealthIndicator';
+import { CqrsModule } from '@nestjs/cqrs';
+import { CreateUserHandler } from 'src/cqrs/CreateUserHandler';
+import { UserFactory } from 'src/domain/UserFactory';
 
 @Module({
   imports: [
@@ -28,9 +35,26 @@ import { LoggingModule } from './LoggingModule';
     AuthModule,
     ExceptionModule,
     LoggingModule,
+    TerminusModule,
+    HttpModule,
+    CqrsModule,
     TypeOrmModule.forFeature([Zzim, User, ZzimDrawer, Product]),
+    CqrsModule,
   ],
-  controllers: [ZzimController, ZzimDrawerController, UserController],
-  providers: [ZzimDrawerService, ZzimService, UserService, Logger],
+  controllers: [
+    ZzimController,
+    ZzimDrawerController,
+    UserController,
+    HealthCheckController,
+  ],
+  providers: [
+    ZzimDrawerService,
+    ZzimService,
+    UserService,
+    DogHealthIndicator,
+    Logger,
+    CreateUserHandler,
+    UserFactory,
+  ],
 })
 export class AllModule {}

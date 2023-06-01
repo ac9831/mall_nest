@@ -7,8 +7,6 @@ import {
   utilities as nestWinstonModuleUtilities,
   WinstonModule,
 } from 'nest-winston';
-import { LoggingInterceptor } from './middleware/LoggingInterceptor';
-import { TransformInterceptor } from './middleware/TransformInterceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -26,17 +24,16 @@ async function bootstrap() {
       ],
     }),
   });
-  //app.useLogger(app.get(MyLogger));
-  //app.useGlobalFilters(new HttpExceptionFilter());
+
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
     }),
   );
-  app.useGlobalInterceptors(
-    new LoggingInterceptor(),
-    new TransformInterceptor(),
-  );
+  // app.useGlobalInterceptors(
+  //   new LoggingInterceptor(),
+  //   new TransformInterceptor(),
+  // );
   const config = new DocumentBuilder()
     .setTitle('saka project')
     .setDescription('saka API')
