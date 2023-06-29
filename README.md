@@ -22,9 +22,4 @@ $ npm run start:dev
 
 ## 참고 사항
 
-1. 이 프로젝트의 목표는 사케 직구 플랫폼을 만드는 것입니다.
-
-## 추후 작업 할 내용
-
-1. jwt 적용 후 header에 userInfo 등록
-2. jest test code 추가
+1. nestjs 공부용 프로젝트
